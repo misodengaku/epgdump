@@ -153,7 +153,12 @@ int main(int argc, char *argv[])
 	if(argc == 4){
 		arg_onTV = argv[1];
 		if(strcmp(argv[2], "-")) {
-			infile = fopen(argv[2], "r");
+			infile = fopen(argv[2],
+#if defined(__MINGW32__)
+				"rb");
+#else
+				"r");
+#endif
 			if ( !infile) {
 			  printf( "tsFile not found (Can't open file: %s)\n", argv[2] );
 			  exit( -1 );
