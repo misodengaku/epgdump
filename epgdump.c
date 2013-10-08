@@ -177,9 +177,9 @@ int main(int argc, char *argv[])
 	}else{
 		fprintf(stdout, "Usage : %s {/BS|/CS|<id>} <tsFile> <outfile>\n", argv[0]);
 		fprintf(stdout, "\n");
-		fprintf(stdout, "id       チャンネル識別子。地上波の物理チャンネルを与えます。\n");
-		fprintf(stdout, "/BS      BSモード。一つのTSからBS全局のデータを読み込みます。\n");
-		fprintf(stdout, "/CS      CSモード。一つのTSから複数局のデータを読み込みます。\n");
+		fprintf(stdout, "<id>     Channel identifier: Specify a physical channel number in Terrestrial.\n");
+		fprintf(stdout, "/BS      BS mode: obtains info of all the services in BS using All-Station SI.\n");
+		fprintf(stdout, "/CS      CS mode: obtains info of services using All-Station SI.\n");
 		return 0;
 	}
 
