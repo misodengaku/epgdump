@@ -468,7 +468,7 @@ void dumpEIT(unsigned char *ptr, SVT_CONTROL *top)
 #endif
 						}
 						if(cur != NULL){
-							cur->content_type = (unsigned char)(contentDesc.content[0] >> 4);
+							cur->content_type = (unsigned char)contentDesc.content[0] >> 4;
 #if 0
 							fprintf(stdout, "%s:", cur->title);
 							fprintf(stdout, ",%02x%02x", (unsigned char)contentDesc.content[0], (unsigned char)contentDesc.content[1]);
