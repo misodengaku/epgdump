@@ -2,7 +2,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#if defined(__MINGW32__) && defined(MINGW_NOICONV)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef BYTE
+#undef WORD
+#undef DWORD
+#ifdef TEXT
+#undef TEXT
+#endif
+#else
 #include <iconv.h>
+#endif
 
 #include "aribstr.h"
 
@@ -292,8 +303,33 @@ const DWORD ProcessCharCode(TCHAR *lpszDst, const WORD wCode, const CODE_SET Cod
 
 const DWORD PutKanjiChar(TCHAR *lpszDst, const WORD wCode)
 {
-	char code[9];
 	char xcode[5];
+#if defined(__MINGW32__) && defined(MINGW_NOICONV)
+	unsigned char code[3];
+	WCHAR wcode[3];
+
+	code[0] = wCode >> 8 & 0x7F;
+	code[1] = wCode & 0x7F;
+	code[2] = '\0';
+
+	// JIS -> SJIS (http://www.unixuser.org/~euske/doc/kanjicode/)
+	code[0] -= 0x21;
+	if ((code[0] & 1) == 0) {
+		code[1] += 0x1F;
+		if (code[1] >= 0x7F) ++code[1];
+	} else {
+		code[1] += 0x7E;
+	}
+	code[0] >>= 1;
+	code[0] += code[0] >= 0x1F ? 0xC1 : 0x81;
+
+	// SJIS -> UTF-8
+	if (!MultiByteToWideChar(932, 0, (LPSTR)code, -1, wcode, 3) ||
+	    !WideCharToMultiByte(CP_UTF8, 0, wcode, -1, xcode, sizeof(xcode), 0, 0)) {
+		xcode[0] = '\0';
+	}
+#else
+	char code[9];
 	iconv_t cd;
 
 	size_t inbyte = 8;
@@ -321,6 +357,7 @@ const DWORD PutKanjiChar(TCHAR *lpszDst, const WORD wCode)
 	iconv(cd, (char **)&fptr, &inbyte, &tptr, &outbyte);
 
 	iconv_close(cd);
+#endif
 
 	strncpy(lpszDst, xcode, strlen(xcode));
 

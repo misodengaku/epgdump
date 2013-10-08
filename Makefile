@@ -2,11 +2,12 @@ PREFIX          = /usr/local
 TARGETS		= epgdump
 OBJ_TARGETS	= epgdump.o aribstr.o eit.o ts.o util.o sdt.o
 HEDDERDEPEND	= eit.h sdt.h aribstr.h ts.h util.h
+MINGW_NOICONV	= -DMINGW_NOICONV
 
 LANG=C
 CC		= gcc
-CFLAGS		=  -std=gnu99 -O2 -Wall -g -Wno-return-type $(RECPT1)
-#LDFLAGS		= -pthread
+CFLAGS		=  -std=gnu99 -O2 -Wall -g -Wno-return-type ${MINGW_NOICONV}
+LDFLAGS		= -static #-pthread
 LIBS		=
 
 .c.o:
