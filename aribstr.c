@@ -324,8 +324,15 @@ const DWORD PutKanjiChar(TCHAR *lpszDst, const WORD wCode)
 	code[0] += code[0] >= 0x1F ? 0xC1 : 0x81;
 
 	// SJIS -> UTF-8
-	if (!MultiByteToWideChar(932, 0, (LPSTR)code, -1, wcode, 3) ||
-	    !WideCharToMultiByte(CP_UTF8, 0, wcode, -1, xcode, sizeof(xcode), 0, 0)) {
+	if (!MultiByteToWideChar(932, 0, (LPSTR)code, -1, wcode, 3)) {
+		wcode[0] = '\0';
+	}
+	// コードページ補正
+	if (wcode[0] == 0x2225) wcode[0] = 0x2016; // DOUBLE VERTICAL LINE
+	if (wcode[0] == 0xFF0D) wcode[0] = 0x2212; // MINUS SIGN
+	if (wcode[0] == 0xFF5E) wcode[0] = 0x301C; // WAVE DASH
+
+	if (!WideCharToMultiByte(CP_UTF8, 0, wcode, -1, xcode, sizeof(xcode), 0, 0)) {
 		xcode[0] = '\0';
 	}
 #else
