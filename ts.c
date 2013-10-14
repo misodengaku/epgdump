@@ -192,12 +192,19 @@ retry:
 			continue ;
 		}
 
+		if(pk.transport_scrambling_control != 0) {
+			/* ペイロードはスクランブルされているのでパースできない */
+			continue;
+		}
+
 		/* 
 		   if the Transport Stream packet carries the first byte of a PSI section, the payload_unit_start_indicator value
 		   shall be '1', indicating that the first byte of the payload of this Transport Stream packet carries the pointer_field.
 		*/
+		int pointer_field = 0;
 		if(pk.payload_unit_start_indicator == 1) {
-			/* pointer_fieldはいらない */
+			/* pointer_fieldはセクションヘッダを指す */
+			pointer_field = payptr[0];
 			payptr += 1;
 			pk.payloadlen -= 1;
 		}
@@ -222,24 +229,32 @@ retry:
 				secs[i].cur = pk;
 				/* 途中処理中か最初か? */
 				if(!secs[i].cont) {
+					if(pk.payload_unit_start_indicator != 1) {
+						/* このパケットにセクションヘッダは存在しない */
+						continue;
+					}
+					if(pk.payloadlen < pointer_field + 3) {
+						/* 必要なペイロード長がない。通常は必ずある(ARIB TR-B14) */
+						continue;
+					}
 					/* 最初 セクション長を調べる */
 					boff = 12;
-					secs[i].seclen = getBit(secs[i].cur.payload, &boff, 12) + 3; // ヘッダ;
+					secs[i].seclen = getBit(&pk.payload[pointer_field], &boff, 12) + 3; // ヘッダ;
 					/*
 					  if(secs[i].seclen == 2334) {
 					  printf("aa");
 					  }
 					*/
 
-					if(secs[i].seclen > secs[i].cur.payloadlen) {
-						memcpy(secs[i].buf, secs[i].cur.payload, secs[i].cur.payloadlen);
-						secs[i].setlen = secs[i].cur.payloadlen;
+					if(secs[i].seclen > pk.payloadlen - pointer_field) {
+						memcpy(secs[i].buf, &pk.payload[pointer_field], pk.payloadlen - pointer_field);
+						secs[i].setlen = pk.payloadlen - pointer_field;
 						secs[i].cont = 1;
 						continue;
 					} 
-					memcpy(secs[i].buf, secs[i].cur.payload, secs[i].seclen);
+					memcpy(secs[i].buf, &pk.payload[pointer_field], secs[i].seclen);
 					secs[i].setlen = secs[i].seclen;
-					secs[i].curlen = secs[i].seclen;
+					secs[i].curlen = pointer_field + secs[i].seclen;
 					secs[i].cont = 1;
 					ridx = i;
 					/* CRCのチェック */
