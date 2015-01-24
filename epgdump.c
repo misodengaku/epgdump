@@ -68,7 +68,7 @@ void	dumpXML(FILE *outfile, char *header)
 	char	cstarttime[32];
 
 	fprintf(outfile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-	fprintf(outfile, "<!DOCTYPE tv SYSTEM \"xmltv.dtd\">\n\n");
+	fprintf(outfile, "<!DOCTYPE tv SYSTEM \"http://xmltv.cvs.sourceforge.net/viewvc/xmltv/xmltv/xmltv.dtd\">\n\n");
 	fprintf(outfile, "<tv generator-info-name=\"tsEPG2xml\" generator-info-url=\"http://localhost/\">\n");
 
 	svtcur = svttop->next;
