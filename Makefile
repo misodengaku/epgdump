@@ -8,7 +8,7 @@ LANG=C
 CC		= gcc
 CFLAGS		=  -std=gnu99 -O2 -Wall -g -Wno-return-type ${MINGW_NOICONV}
 LDFLAGS		= -static #-pthread
-LIBS		=
+LIBS		= -liconv
 
 .c.o:
 	${CC} ${CFLAGS} -c $<
